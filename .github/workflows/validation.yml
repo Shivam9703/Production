@@ -3,7 +3,7 @@ name: Validate Changed Salesforce Files
 on:
   pull_request:
     branches:
-      - main
+      - main  # or your default branch
 
 jobs:
   validate:
@@ -13,14 +13,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Ensure full git history for diff
 
-      - name: Get changed component folders
-        id: changed-folders
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: force-app/**  # Adjust path if your metadata is elsewhere
+
+      - name: List changed files
         run: |
-          # Get unique parent directories for changed files
-          CHANGED_DIRS=$(git diff --name-only origin/main...HEAD 'force-app/main/default/lwc/' | xargs -n1 dirname | sort -u | tr '\n' ',' | sed 's/,$//')
-          echo "changed_folders=$CHANGED_DIRS" >> $GITHUB_OUTPUT
+          echo "Changed files:"
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$file"
+          done
 
       - name: Install Salesforce CLI
         run: npm install --global @salesforce/cli
@@ -30,20 +36,14 @@ jobs:
           echo "${{ secrets.SFDX_AUTH_URL }}" > ./auth-url.txt
           sf org login sfdx-url --sfdx-url-file ./auth-url.txt --set-default
 
-      - name: Validate changed components
-        if: steps.changed-folders.outputs.changed_folders != ''
+      - name: Validate deployment of changed files
+        if: steps.changed-files.outputs.any_changed == 'true'
         run: |
-          # Properly format directories with potential spaces
-          CHANGED_DIRS="${{ steps.changed-folders.outputs.changed_folders }}"
-          
-          # Add quotes if any path contains spaces
-          if [[ "$CHANGED_DIRS" == *" "* ]]; then
-            CHANGED_DIRS="\"$CHANGED_DIRS\""
-          fi
+          # Convert space-separated list to comma-separated for Salesforce CLI
+          CHANGED_FILES=$(echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' ',')
+          echo "Validating: $CHANGED_FILES"
+          sf project deploy validate --source-dir $CHANGED_FILES --wait 30 --test-level RunLocalTests --verbose
 
-          echo "Validating: $CHANGED_DIRS"
-          sf project deploy validate --source-dir="$CHANGED_DIRS" --wait 30 --test-level RunLocalTests --verbose
-
-      - name: Skip if no components changed
-        if: steps.changed-folders.outputs.changed_folders == ''
-        run: echo "No components changed. Skipping validation."
+      - name: Skip validation if no Salesforce files changed
+        if: steps.changed-files.outputs.any_changed != 'true'
+        run: echo "No Salesforce metadata files changed. Skipping validation."

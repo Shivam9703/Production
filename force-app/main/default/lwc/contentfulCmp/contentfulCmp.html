@@ -1,0 +1,20 @@
+<template>
+    <!--<div>
+        {response}
+    </div>-->
+    <lightning-card >
+        <div class="slds-m-around_medium">
+            <template if:true={items}>
+                <template for:each={items} for:item="item">
+                    <div key={item} class="paragraphCss">
+                    <p onclick={handleItem} data-content={item.sys.id} class="slds-text-align_center slds-text-heading_large slds-text-title_bold slds-m-around_medium" style="cursor: pointer;"><a class="aCss"> {item.fields.title}</a></p>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </lightning-card>
+    <hr>
+    <div class="slds-m-around_large">
+        <lightning-formatted-rich-text value={richtext}></lightning-formatted-rich-text>
+    </div>
+</template>

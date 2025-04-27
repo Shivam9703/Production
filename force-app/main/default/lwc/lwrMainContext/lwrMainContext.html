@@ -1,0 +1,22 @@
+<template>
+    <div class="slds-float_left">
+    <div style="font-size: 12px;">
+        <span class="home"><p>home /&nbsp; {headerValue}</p></span>
+    </div>
+    <div  class="header-column1" style="font-size: 30px;">
+       <strong><h1>{headerValue}</h1></strong> 
+    </div>
+    
+    <template if:true={headerValue}>
+    <div class="slds-form-element_horizontal fieldTitle" >
+        <p> Payments for Family plan</p>
+        <p> Payments for Duo plan</p>
+        <p> Update Payment Details</p>
+        <p> View your receipts</p>
+        <p> Billing Date</p>
+        <p> Cancel Premium Plans</p>
+        <p> Why can't I get Premium in the app?</p>
+    </div>
+    </template>
+</div>
+</template>

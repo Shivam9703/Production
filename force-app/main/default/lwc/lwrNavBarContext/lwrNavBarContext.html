@@ -1,0 +1,70 @@
+<template>
+    <div class="slds-box" style="max-width: 280px;">
+        <div class="slds-m-vertical_medium">
+          <b><h1 class="header-column1"><strong>How can we help you?</strong></h1></b>
+        </div>
+        <lightning-vertical-navigation style="max-width: 200px;">
+            <lightning-vertical-navigation-section class="header-column" label="Payment Help">
+                <div class="fieldTitle">
+                <lightning-vertical-navigation-item  label="Manage payments" name="Manage payments" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Payment Methods" name="Payment Methods" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Charge Help" name="Charge Help" onclick={handleClick}></lightning-vertical-navigation-item>
+                </div>
+            </lightning-vertical-navigation-section>
+            <lightning-vertical-navigation-section class="header-column" label="Plan Help">
+                <div class="fieldTitle">
+                <lightning-vertical-navigation-item  label="Manage payments" name="Available plans" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Payment Methods" name="Plan settings" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Charge Help" name="Premium Family &amp; Kids" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Payment Methods" name="Premium Duo" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Payment Methods" name="Premium Students" onclick={handleClick}></lightning-vertical-navigation-item>
+               </div>
+            </lightning-vertical-navigation-section>
+            <lightning-vertical-navigation-section class="header-column" label="App Help">
+                <div class="fieldTitle">
+                <lightning-vertical-navigation-item  label="Manage payments" name="Getting Started" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Payment Methods" name="App Settings" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Charge Help" name="Troubleshooting" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Charge Help" name="Playlists" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Charge Help" name="Feature" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Charge Help" name="Social features" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Charge Help" name="Listening privacy" onclick={handleClick}></lightning-vertical-navigation-item>
+                </div>
+            </lightning-vertical-navigation-section>
+            <lightning-vertical-navigation-section class="header-column" label="Device Help">
+                <div class="fieldTitle">
+                <lightning-vertical-navigation-item  label="Manage payments" name="Speakers" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Payment Methods" name="Smart watches" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Charge Help" name="Tvs" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Charge Help" name="Gaming" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Charge Help" name="Cars" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Charge Help" name="Car Thing" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Charge Help" name="Voice assistants" onclick={handleClick}></lightning-vertical-navigation-item>
+            </div>
+            <lightning-vertical-navigation-section class="header-column" label="Safety &amp; Privacy">
+                <div class="fieldTitle">
+                <lightning-vertical-navigation-item  label="Manage payments" name="Data and privacy info" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Payment Methods" name="Platform Rules" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Charge Help" name="Content Actions" onclick={handleClick}></lightning-vertical-navigation-item>
+                </div>
+            </lightning-vertical-navigation-section>
+            <lightning-vertical-navigation-section class="header-column" label="Account Help">
+                <div class="fieldTitle">
+                <lightning-vertical-navigation-item  label="Manage payments" name="Logging in" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Payment Methods" name="Profile Help" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Charge Help" name="Account settings" onclick={handleClick}></lightning-vertical-navigation-item>
+                <lightning-vertical-navigation-item  label="Charge Help" name="Security" onclick={handleClick}></lightning-vertical-navigation-item>
+            </div>
+            </lightning-vertical-navigation-section>
+            </lightning-vertical-navigation-section>
+        </lightning-vertical-navigation>
+        <div class="slds-m-vertical_medium">
+            <p style="font-size: 9px;">Get the full Spotify experience!</p>
+            <p style="text-decoration: underline; font-size: 9px;"><a href="">upgrade to premius</a></p>
+        </div>
+      <!--  <div class="slds-m-vertical_large">
+            <p>Get the full Spotify experience!</p>
+            <p><a href="">upgrade to premius</a></p>
+        </div>-->
+    </div>
+</template>

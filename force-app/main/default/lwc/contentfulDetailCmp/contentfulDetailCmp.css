@@ -1,0 +1,8 @@
+a:hover {
+    text-decoration: none !important;
+    --dxp-s-link-text-color-hover: green !important;
+}
+a{
+    color: black;
+    font-weight: bolder !important;
+}

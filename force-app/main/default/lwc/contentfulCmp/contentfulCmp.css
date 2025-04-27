@@ -1,0 +1,7 @@
+a:hover {
+    --dxp-s-link-text-color-hover: green !important;
+}
+aCss{
+    color: black;
+    text-decoration: none !important;
+}

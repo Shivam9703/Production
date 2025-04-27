@@ -1,0 +1,37 @@
+<template>
+        <div >
+
+    <header data-f6-region class="headerCss">
+        <slot name="header"></slot>
+    </header>
+    <main data-f6-region>
+        <div class="slds-grid slds-gutters">
+            <div class="slds-col slds-size_1-of-3">
+                <slot></slot>
+            </div>
+            <div class="slds-col slds-size_2-of-3">
+                <slot name="body1"></slot>
+            </div>
+        </div>
+    </main>
+    <footer data-f6-region>
+        <slot name="footer"></slot>
+    </footer>
+        </div>
+
+</template>
+
+<!--<template>
+    <div class="customCss">
+        <slot name="header"></slot><br>
+        <div class="slds-grid slds-gutters">
+            <div class="slds-col slds-size_1-of-3">
+                <slot></slot>
+            </div>
+            <div class="slds-col slds-size_2-of-3">
+                <slot name="body1"></slot>
+            </div>
+          </div><br>
+        <slot name="footer"></slot>
+    </div>
+</template>-->

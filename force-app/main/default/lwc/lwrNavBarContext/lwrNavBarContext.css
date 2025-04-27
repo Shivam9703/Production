@@ -1,0 +1,18 @@
+.header-column {
+    color: black;
+}
+.header-column1 {
+    color: black;
+    font-size: 1.5rem;
+    max-width: 200px;
+}
+.fieldTitle {
+    font-size: .75rem;
+    line-height: 0.2;
+    color: black;
+    margin-bottom: .15rem;
+}
+
+.h1 {
+    --slds-c-vertical-navigation-item-color-background: var(--c-black);
+  }

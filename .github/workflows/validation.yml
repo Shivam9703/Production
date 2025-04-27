@@ -13,13 +13,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Required for proper git diff
 
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v44
-        with:
-          files: force-app/**  # Track changes in Salesforce metadata directory
+      - name: Get changed component folders
+        id: changed-folders
+        run: |
+          # Get unique parent directories for changed files
+          CHANGED_DIRS=$(git diff --name-only origin/main...HEAD 'force-app/main/default/lwc/' | xargs -n1 dirname | sort -u | tr '\n' ',' | sed 's/,$//')
+          echo "changed_folders=$CHANGED_DIRS" >> $GITHUB_OUTPUT
+
+      - name: List changed folders
+        run: |
+          echo "Changed component folders:"
+          echo "${{ steps.changed-folders.outputs.changed_folders }}"
 
       - name: Install Salesforce CLI
         run: npm install --global @salesforce/cli
@@ -29,16 +35,12 @@ jobs:
           echo "${{ secrets.SFDX_AUTH_URL }}" > ./auth-url.txt
           sf org login sfdx-url --sfdx-url-file ./auth-url.txt --set-default
 
-      - name: Validate changed files
-        if: steps.changed-files.outputs.any_changed == 'true'
+      - name: Validate changed components
+        if: steps.changed-folders.outputs.changed_folders != ''
         run: |
-          # Convert space-separated list to comma-separated with proper escaping
-          CHANGED_FILES=$(echo "${{ steps.changed-files.outputs.all_changed_files }}" | sed 's/ /,/g')
-          
-          # Add quotes if filenames contain spaces
-          if [[ "$CHANGED_FILES" == *" "* ]]; then
-            CHANGED_FILES="\"$CHANGED_FILES\""
-          fi
+          echo "Validating: ${{ steps.changed-folders.outputs.changed_folders }}"
+          sf project deploy validate --source-dir "${{ steps.changed-folders.outputs.changed_folders }}" --wait 30 --test-level RunLocalTests --verbose
 
-          echo "Validating files: $CHANGED_FILES"
-          sf project deploy validate --source-dir="$CHANGED_FILES" --wait 30 --test-level RunLocalTests --verbose
+      - name: Skip if no components changed
+        if: steps.changed-folders.outputs.changed_folders == ''
+        run: echo "No components changed. Skipping validation."

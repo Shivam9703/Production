@@ -1,0 +1,16 @@
+<template>
+  <div class="star-rating">
+    <template for:each={stars} for:item="star">
+      <span
+        key={star.value}
+        class={star.class}
+        data-value={star.value}
+        onclick={handleStarClick}
+        onmouseover={handleMouseOver}
+        onmouseout={handleMouseOut}
+      >
+        &#9733;
+      </span>
+    </template>
+  </div>
+</template>

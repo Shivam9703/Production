@@ -1,0 +1,10 @@
+:host {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+    --dxp-c-section-content-spacing-block-start: 0;
+    --dxp-c-section-content-spacing-inline-end: 0;
+    --dxp-c-section-content-spacing-block-end: 0;
+    --dxp-c-section-content-spacing-inline-start: 0;
+    --dxp-c-section-columns-max-width: none;
+  }

@@ -1,0 +1,17 @@
+<!-- sldsValidatorIgnore -->
+<template>
+        <header>
+            <slot name="header"></slot>
+        </header>
+       <div class="slds-grid slds-form__row">
+        <section style="max-width: 320px;">
+            <slot name="sidebar"></slot>
+        </section> 
+        <section >
+            <slot name="main"></slot>
+        </section>    
+        </div>
+        <footer data-f6-region>
+            <slot name="footer"></slot>
+        </footer>
+</template>

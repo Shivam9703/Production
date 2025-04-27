@@ -1,0 +1,51 @@
+<template>
+
+    <div class="slds-grid slds-gutters" style="height:fit-content">
+        <div class="c-container">
+    
+            <!--<lightning-layout>
+                <lightning-layout-item padding="around-small">
+                    <div style="margin-left: 40%;">
+                        <img src={spotifyLogo}>
+                    </div>
+                </lightning-layout-item>
+            </lightning-layout>-->
+                <div class="slds-grid slds-gutters">
+                    <div class="slds-col slds-size_1-of-12">
+                    </div>
+                <div class="slds-col slds-size_2-of-12">
+                    <img style="padding-bottom: 5%; padding-top: 5%;" src={spotifyLogo}>
+                </div>
+                <div class="slds-col slds-size_3-of-12">
+                </div>
+                <div class="slds-col slds-size_3-of-12 headerText">
+                    <ul class="slds-list_horizontal">
+                       
+                    <template for:each={menuItems} for:item="item">
+                        <div key={item} class="slds-col" >
+                            <li><a href={href}>{item.label}</a></li>
+                        </div>
+                    </template>
+                    </ul>
+
+                </div>
+                
+                <b style="color:white;" class="slds-p-right_small headerText">&#10073;</b>
+
+                <div class="slds-col slds-size_2-of-12 headerText">
+                    
+                    <ul class="slds-list_horizontal">
+                        
+                        <template for:each={loginItem} for:item="item">
+                            <div key={item} class="slds-col" >
+                                <li><a href={href}>{item.label}</a></li>
+                            </div>
+                        </template>
+                        </ul>
+                </div>
+                <div class="slds-col slds-size_1-of-12">
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

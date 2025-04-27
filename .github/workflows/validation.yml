@@ -3,7 +3,7 @@ name: Validate Changed Salesforce Files
 on:
   pull_request:
     branches:
-      - main  # or your default branch
+      - main
 
 jobs:
   validate:
@@ -13,20 +13,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Ensure full git history for diff
+          fetch-depth: 0
 
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v44
         with:
-          files: force-app/**  # Adjust path if your metadata is elsewhere
-
-      - name: List changed files
-        run: |
-          echo "Changed files:"
-          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            echo "$file"
-          done
+          files: force-app/**  # Track changes in Salesforce metadata directory
 
       - name: Install Salesforce CLI
         run: npm install --global @salesforce/cli
@@ -36,14 +29,16 @@ jobs:
           echo "${{ secrets.SFDX_AUTH_URL }}" > ./auth-url.txt
           sf org login sfdx-url --sfdx-url-file ./auth-url.txt --set-default
 
-      - name: Validate deployment of changed files
+      - name: Validate changed files
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
-          # Convert space-separated list to comma-separated for Salesforce CLI
-          CHANGED_FILES=$(echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' ',')
-          echo "Validating: $CHANGED_FILES"
-          sf project deploy validate --source-dir $CHANGED_FILES --wait 30 --test-level RunLocalTests --verbose
+          # Convert space-separated list to comma-separated with proper escaping
+          CHANGED_FILES=$(echo "${{ steps.changed-files.outputs.all_changed_files }}" | sed 's/ /,/g')
+          
+          # Add quotes if filenames contain spaces
+          if [[ "$CHANGED_FILES" == *" "* ]]; then
+            CHANGED_FILES="\"$CHANGED_FILES\""
+          fi
 
-      - name: Skip validation if no Salesforce files changed
-        if: steps.changed-files.outputs.any_changed != 'true'
-        run: echo "No Salesforce metadata files changed. Skipping validation."
+          echo "Validating files: $CHANGED_FILES"
+          sf project deploy validate --source-dir="$CHANGED_FILES" --wait 30 --test-level RunLocalTests --verbose

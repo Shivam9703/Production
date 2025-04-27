@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Required for proper git diff
+          fetch-depth: 0
 
       - name: Get changed component folders
         id: changed-folders
@@ -21,11 +21,6 @@ jobs:
           # Get unique parent directories for changed files
           CHANGED_DIRS=$(git diff --name-only origin/main...HEAD 'force-app/main/default/lwc/' | xargs -n1 dirname | sort -u | tr '\n' ',' | sed 's/,$//')
           echo "changed_folders=$CHANGED_DIRS" >> $GITHUB_OUTPUT
-
-      - name: List changed folders
-        run: |
-          echo "Changed component folders:"
-          echo "${{ steps.changed-folders.outputs.changed_folders }}"
 
       - name: Install Salesforce CLI
         run: npm install --global @salesforce/cli
@@ -38,8 +33,16 @@ jobs:
       - name: Validate changed components
         if: steps.changed-folders.outputs.changed_folders != ''
         run: |
-          echo "Validating: ${{ steps.changed-folders.outputs.changed_folders }}"
-          sf project deploy validate --source-dir "${{ steps.changed-folders.outputs.changed_folders }}" --wait 30 --test-level RunLocalTests --verbose
+          # Properly format directories with potential spaces
+          CHANGED_DIRS="${{ steps.changed-folders.outputs.changed_folders }}"
+          
+          # Add quotes if any path contains spaces
+          if [[ "$CHANGED_DIRS" == *" "* ]]; then
+            CHANGED_DIRS="\"$CHANGED_DIRS\""
+          fi
+
+          echo "Validating: $CHANGED_DIRS"
+          sf project deploy validate --source-dir="$CHANGED_DIRS" --wait 30 --test-level RunLocalTests --verbose
 
       - name: Skip if no components changed
         if: steps.changed-folders.outputs.changed_folders == ''

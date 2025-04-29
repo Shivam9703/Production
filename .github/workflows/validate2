@@ -1,0 +1,48 @@
+name: Validate Merge with Salesforce Org
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-sfdx-changes:
+    name: Validate Salesforce Changes
+    runs-on: ubuntu-latest
+   
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Needed for git diff
+    
+    - name: Identify changed files
+      id: changed-files
+      run: |
+        echo "CHANGED_FILES=$(git diff --name-only origin/main...HEAD -- force-app/main/default | tr '\n' ' ')" >> $GITHUB_OUTPUT
+    
+    - name: Setup SFDX CLI
+      uses: salesforce-actions/setup-sfdx@v2
+      with:
+        sfdx-auth-url: ${{ secrets.SF_SANDBOX_AUTH_URL }}
+
+    - name: Authenticate to Salesforce Org
+        run: |
+          echo "${{ secrets.SFDX_AUTH_URL }}" > ./auth-url.txt
+          sf org login sfdx-url --sfdx-url-file ./auth-url.txt --set-default
+
+    
+    - name: Validate deployment (check-only)
+      run: |
+        # Create package.xml from changed files
+        sfdx force:source:convert -r force-app/main/default -d deploy-src
+        
+        # Deploy in validation mode (check-only)
+        sfdx force:source:deploy \
+          --checkonly \
+          --testlevel RunLocalTests \
+          --validateddeployrequestid ${{ github.event.pull_request.number }} \
+          --wait 30 \
+          --sourcepath deploy-src
+        
+        # Alternatively if you want to deploy only changed files:
+        # sfdx force:source:deploy --checkonly --sourcepath ${{ steps.changed-files.outputs.CHANGED_FILES }}

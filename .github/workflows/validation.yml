@@ -19,31 +19,46 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v44
         with:
-          files: force-app/**  # Adjust path if your metadata is elsewhere
+          base_sha: ${{ github.event.pull_request.base.sha }}
+          sha: ${{ github.event.pull_request.head.sha }}
+          files: |
+            force-app/**
+            manifest/**
+            sfdx-project.json
 
       - name: List changed files
         run: |
-          echo "Changed files:"
-          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            echo "$file"
-          done
+          echo "All changed files: ${{ steps.changed-files.outputs.all_changed_files }}"
+          echo "Modified files: ${{ steps.changed-files.outputs.modified_files }}"
+          echo "Added files: ${{ steps.changed-files.outputs.added_files }}"
 
       - name: Install Salesforce CLI
-        run: npm install --global @salesforce/cli
+        run: |
+          npm install --global @salesforce/cli
+          sf --version
 
       - name: Authenticate to Salesforce Org
         run: |
           echo "${{ secrets.SFDX_AUTH_URL }}" > ./auth-url.txt
-          sf org login sfdx-url --sfdx-url-file ./auth-url.txt --set-default
+          sf org login sfdx-url --sfdx-url-file ./auth-url.txt --set-default --alias validation-org
 
       - name: Validate deployment of changed files
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
-          # Convert space-separated list to comma-separated for Salesforce CLI
-          CHANGED_FILES=$(echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' ',')
-          echo "Validating: $CHANGED_FILES"
-          sf project deploy validate --source-dir $CHANGED_FILES --wait 30 --test-level RunLocalTests --verbose
-
-      - name: Skip validation if no Salesforce files changed
-        if: steps.changed-files.outputs.any_changed != 'true'
-        run: echo "No Salesforce metadata files changed. Skipping validation."
+          # Create temporary directory for changed files
+          mkdir -p changed-sources
+          
+          # Copy only changed files to temporary directory
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if [ -f "$file" ]; then
+              mkdir -p "changed-sources/$(dirname "$file")"
+              cp "$file" "changed-sources/$file"
+            fi
+          done
+          
+          # Run validation deployment
+          sf project deploy validate \
+            --source-dir changed-sources \
+            --wait 30 \
+            --test-level RunLocalTests \
+            --verbose

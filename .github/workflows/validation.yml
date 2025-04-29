@@ -13,23 +13,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for proper diffing
+          fetch-depth: 0  # Required for proper diffing
 
-      - name: Get all changed files
-        id: changed-files
+      - name: Find changed Apex classes
+        id: find-changes
         run: |
-          # Get all changed files between PR branch and main
-          echo "CHANGED_FILES=$(git diff --name-only origin/main...HEAD | tr '\n' ' ')" >> $GITHUB_OUTPUT
-          echo "ANY_CHANGED=$(git diff --quiet origin/main...HEAD || echo 'true')" >> $GITHUB_OUTPUT
-
-      - name: Filter Salesforce files
-        id: sf-files
-        run: |
-          # Filter for Salesforce metadata files
-          SF_FILES=$(echo "${{ steps.changed-files.outputs.CHANGED_FILES }}" | grep -E 'force-app/.*\.(cls|page|component|trigger|xml|$)' || true)
-          echo "SF_CHANGED_FILES=${SF_FILES}" >> $GITHUB_OUTPUT
-          echo "SF_ANY_CHANGED=$( [ -z "$SF_FILES" ] && echo 'false' || echo 'true' )" >> $GITHUB_OUTPUT
-          echo "Filtered Salesforce files: ${SF_FILES}"
+          # Get changed files in classes directory
+          CHANGED_CLASSES=$(git diff --name-only origin/main...HEAD -- force-app/main/default/classes/*.cls)
+          
+          # Convert to space-separated list
+          CHANGED_FILES=$(echo "$CHANGED_CLASSES" | tr '\n' ' ')
+          
+          # Set outputs
+          echo "changed_files=${CHANGED_FILES}" >> $GITHUB_OUTPUT
+          echo "has_changes=$( [ -z "$CHANGED_FILES" ] && echo 'false' || echo 'true' )" >> $GITHUB_OUTPUT
+          
+          # Debug output
+          echo "Changed files: ${CHANGED_FILES}"
+          echo "Has changes: $( [ -z "$CHANGED_FILES" ] && echo 'false' || echo 'true' )"
 
       - name: Install Salesforce CLI
         run: npm install --global @salesforce/cli
@@ -39,33 +40,32 @@ jobs:
           echo "${{ secrets.SFDX_AUTH_URL }}" > ./auth-url.txt
           sf org login sfdx-url --sfdx-url-file ./auth-url.txt --set-default
 
-      - name: Validate deployment of changed files
-        if: steps.sf-files.outputs.SF_ANY_CHANGED == 'true'
+      - name: Validate changed classes
+        if: steps.find-changes.outputs.has_changes == 'true'
         run: |
-          # Create package.xml from changed files
-          mkdir -p deploy-src
-          echo '<?xml version="1.0" encoding="UTF-8"?>' > deploy-src/package.xml
-          echo '<Package xmlns="http://soap.sforce.com/2006/04/metadata">' >> deploy-src/package.xml
+          # Create temporary directory structure
+          mkdir -p deploy-src/force-app/main/default/classes
           
-          # Add Apex classes if changed
-          if echo "${{ steps.sf-files.outputs.SF_CHANGED_FILES }}" | grep -q '\.cls$'; then
-            echo '  <types>' >> deploy-src/package.xml
-            echo '    <members>*</members>' >> deploy-src/package.xml
-            echo '    <name>ApexClass</name>' >> deploy-src/package.xml
-            echo '  </types>' >> deploy-src/package.xml
-          fi
-          
-          # Add other metadata types as needed
-          echo '  <version>58.0</version>' >> deploy-src/package.xml
-          echo '</Package>' >> deploy-src/package.xml
-          
-          # Copy actual changed files
-          for file in ${{ steps.sf-files.outputs.SF_CHANGED_FILES }}; do
+          # Copy changed files
+          for file in ${{ steps.find-changes.outputs.changed_files }}; do
             if [ -f "$file" ]; then
-              mkdir -p "deploy-src/$(dirname "$file")"
               cp "$file" "deploy-src/$file"
+              echo "Copied $file for deployment"
             fi
           done
+          
+          # Create package.xml
+          mkdir -p deploy-src/force-app/main/default
+          cat > deploy-src/force-app/main/default/package.xml <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <Package xmlns="http://soap.sforce.com/2006/04/metadata">
+            <types>
+              <members>*</members>
+              <name>ApexClass</name>
+            </types>
+            <version>58.0</version>
+          </Package>
+          EOF
           
           # Run validation deployment
           sf project deploy validate \
@@ -74,6 +74,6 @@ jobs:
             --test-level RunLocalTests \
             --verbose
 
-      - name: Skip validation if no Salesforce files changed
-        if: steps.sf-files.outputs.SF_ANY_CHANGED != 'true'
-        run: echo "No Salesforce metadata files changed. Skipping validation."
+      - name: Skip validation if no class changes
+        if: steps.find-changes.outputs.has_changes != 'true'
+        run: echo "No Apex class changes detected. Skipping validation."

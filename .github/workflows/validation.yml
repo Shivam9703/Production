@@ -15,33 +15,19 @@ jobs:
         with:
           fetch-depth: 0  # Required for proper diffing
 
-      - name: Debug repository structure
-        run: |
-          echo "Current directory structure:"
-          find . -type f | grep -iE '\.cls$|package\.xml'
-          echo "Git branch info:"
-          git branch -a
-          echo "Git remote info:"
-          git remote -v
-          echo "Full diff output:"
-          git diff origin/main...HEAD --name-only
-
       - name: Find changed Apex classes
         id: find-changes
         run: |
+          # Fetch the base branch for comparison
+          git fetch origin main
+          
           # Get changed files in classes directory
           echo "Running diff command:"
-          git diff origin/main...HEAD --name-only -- force-app/main/default/classes/
-          
-          CHANGED_CLASSES=$(git diff --name-only origin/main...HEAD -- force-app/main/default/classes/)
-          echo "Raw changed classes: $CHANGED_CLASSES"
-          
-          # Filter for .cls files only
-          CHANGED_CLASSES=$(echo "$CHANGED_CLASSES" | grep -i '\.cls$')
-          echo "Filtered .cls files: $CHANGED_CLASSES"
+          CHANGED_CLASSES=$(git diff --name-only origin/main...HEAD -- "force-app/main/default/classes/*.cls")
+          echo "Changed classes: $CHANGED_CLASSES"
           
           # Convert to space-separated list
-          CHANGED_FILES=$(echo "$CHANGED_CLASSES" | tr '\n' ' ')
+          CHANGED_FILES=$(echo "$CHANGED_CLASSES" | tr '\n' ' ' | xargs)
           
           # Set outputs
           echo "changed_files=${CHANGED_FILES}" >> $GITHUB_OUTPUT
